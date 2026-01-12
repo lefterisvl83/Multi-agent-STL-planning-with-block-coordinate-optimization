@@ -2,7 +2,7 @@
 Using penalty methods with block coordinate gradient descent to solve multi-agent signal temporal logic (STL) planning problems
 
 <p align="center">
-  <img src="trajectories.gif" width="600" title="STL Planning Animation">
+  <img src="assets/trajectories.gif" width="600" title="STL Planning Animation">
   <br>
   <img src="https://img.shields.io/badge/Python-3.9+-blue.svg">
   <img src="https://img.shields.io/badge/JAX-Accelerated-orange.svg">
