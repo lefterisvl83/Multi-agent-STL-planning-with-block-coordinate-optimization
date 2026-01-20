@@ -1,4 +1,4 @@
-# Multi-agent-STL-planning-with-block-coordinate-optimization
+# Multi-agent STL planning with block-coordinate optimization & penalty methods
 Using penalty methods with block coordinate gradient descent to solve multi-agent signal temporal logic (STL) planning problems
 
 <p align="center">
