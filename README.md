@@ -144,9 +144,11 @@ $$
 ---
 
 ## 🚀 Features
+* **Simplicity**: Eliminates the need for Hessian $H^k$ computation. The quadratic approximation of the penalty function $R(u)$ can be simplified by setting $H_i^k = I$.  
 * **Scalability**: Handles large robot fleets by directional updates at the agent-block level.
-* **Expressivity**: Supports all STL operators including *Always* ($\square$), *Eventually* ($\lozenge$), and *Until* ($\mathcal{U}$).
-* **Convergence**: Provable convergence to stationary points of the penalized problem.
+* **Convergence**: Provable convergence to stationary points of the penalized problem (UPP).
+
+---
 
 ## 📜 Citation
 If you use this code in your research, please cite:
