@@ -277,6 +277,7 @@ $$
 | 8 | **end for** |
 | **Output:** | $\boldsymbol{u}^{\star,k}$ |
 
+
 > 🐍 **Python Implementation: JAX-Compatible BCGD**
 >
 > This function performs one full "epoch" of updates. By using `jax.lax.fori_loop`, we maintain the sequential dependency required by the Gauss-Seidel method while staying inside the XLA-compiled JIT boundary.
@@ -371,7 +372,16 @@ def penalty_method_outer_loop(u_init, config):
 * **Simplicity**: Eliminates the need for Hessian $H^k$ computation. The quadratic approximation of the penalty function $R(u)$ can be simplified by setting $H_i^k = I$.  
 * **Scalability**: Handles large robot fleets by directional updates at the agent-block level.
 * **Convergence**: Provable convergence to stationary points of the penalized problem (UPP).
+---
+## 📚 References
+Details of the smooth under approximations of the STL robustness function can be found in:
+* **Y. Gilpin, V. Kurtz, and H. Lin**, “A smooth robustness measure of signal temporal logic for symbolic control,” IEEE Control Systems Letters, vol. 5, no. 1, pp. 241–246, 2020
 
+The Block-Coordinate Gradient Descent (BCGD) implementation and its convergence properties are based on the framework established in: 
+* **P. Tseng and S. Yun**, "A coordinate gradient descent method for nonsmooth separable minimization," Mathematical Programming, vol. 117, no. 1, pp. 387–423, 2009.
+
+The Penalty Method (Outer Loop) is based on the framework in:
+* **W. Sun and Y.-X. Yuan**, Optimization Theory and Methods: Nonlinear Programming, Springer, 2006. (See Section 10.2: The Simple Penalty Function Method).
 ---
 
 ## 📜 Citation
