@@ -28,10 +28,55 @@ $$x_i(t+1) = f_i(x_i(t), u_i(t))$$
 
 where $x_i(t) \in \mathbb{R}^{n_i}$ and $u_i(t) \in \mathbb{R}^{m_i}$ are the state and input vectors. 
 
-Agents are grouped into **cliques** $\nu \in \mathcal{K}_\phi$ based on their collaborative tasks.
+> 🐍 Python Implementation: Unicycle Dynamics:
+> We model each agent $i$ as a unicycle with states $x_i = [p_x, p_y, \theta]^\top$ and inputs $u_i = [v, \omega]^\top$ (linear velocity and angular velocity).
+>
+```python
+import jax
+import jax.numpy as jnp
+
+@jax.jit
+def unicycle_step(state, control, dt=0.1):
+    """
+    Non-linear unicycle motion model.
+    state: [x, y, theta]
+    control: [v, omega]
+    """
+    x, y, theta = state
+    v, omega = control
+    
+    # Standard unicycle kinematics
+    new_x = x + v * jnp.cos(theta) * dt
+    new_y = y + v * jnp.sin(theta) * dt
+    new_theta = theta + omega * dt
+    
+    return jnp.array([new_x, new_y, new_theta])
+
+@jax.jit
+def compute_unicycle_trajectory(u_i, x0_i, dt=0.1):
+    """
+    Predicts the horizon trajectory for a single unicycle agent.
+    u_i: (N, 2) sequence of [v, omega]
+    x0_i: (3,) initial state [x, y, theta]
+    """
+    def scan_op(state, ut):
+        next_state = unicycle_step(state, ut, dt)
+        return next_state, state # (carry, output)
+
+    # jax.lax.scan is XLA-optimized for sequential state updates
+    last_state, trajectory = jax.lax.scan(scan_op, x0_i, u_i)
+    
+    # Append the final state to complete the (N+1, 3) trajectory
+    return jnp.vstack([trajectory, last_state])
+
+# Vectorize for the entire MAS (M agents)
+# in_axes=(0, 0) means we map over the first dimension of both u and x0
+compute_MAS_trajectories = jax.vmap(compute_unicycle_trajectory, in_axes=(0, 0, None))
+X_all = compute_MAS_trajectories(U, X0, dt)
+```
 
 ### Multi-Agent STL specification
-The MAS is subject to the specification
+Agents are grouped into **cliques** $\nu \in \mathcal{K}_\phi$ based on their collaborative tasks. The MAS is subject to the specification
 
 $$\phi = \bigwedge_{\nu \in \mathcal{K}_\phi} \phi_\nu$$
 
@@ -83,15 +128,41 @@ This is a smooth penalty function with gradient
 
 $$\nabla R(**u**) = -2\max(0,-\varrho^\phi_\Gamma(**u**))\nabla\varrho_\Gamma^\phi(**u**)$$
 
-where $\varrho^\phi_\Gamma(u)$ represents the **smooth STL semantics** underapproximating $\min\rho^{\phi_\nu}(\mathbf{u}_\nu)$ using log-sum-exp underapproximations: 
+where $\varrho^\phi_\Gamma(u)$ represents the **smooth STL semantics** underapproximating $\min\rho^{\phi_\nu}(\mathbf{u}_\nu)$. 
 
-$$\min \left(\mu_1,\ldots,\mu_q\right) 
+> We use **softmin/softmax** to underapproximate min/max operators in $\min\rho^{\phi_\nu}(\mathbf{u}_\nu)$: 
+>
+>$$\min \left(\mu_1,\ldots,\mu_q\right) 
 \overset{^{\geq}}{\approx} 
 -\frac{1}{\Gamma} \log\left(\sum_{j=1}^q \exp(-\Gamma \mu_j)\right)$$
+>
+>$$\max \left(\mu_1,\ldots,\mu_q\right) 
+\overset{^{\geq}}{\approx} 
+\frac{\sum_{j=1}^q \mu_j \exp(\Gamma \mu_j)}{\sum_{j=1}^q \exp(\Gamma \mu_j)}$$
+>
+>where $\Gamma>0$ is the smoothing parameter.
 
-and $\Gamma>0$ is the smoothing parameter
+```python
+import jax
+import jax.numpy as jnp
 
+def smooth_min(vec, G):
+    m = jnp.min(vec)
+    return -(1/G) * (jnp.log(jnp.sum(jnp.exp(-G * (vec - m)))) - G * m)
 
+def smooth_max(vec, G):
+    """
+    Boltzmann operator (Softmax weighted average).
+    Approximates max(vec) as a weighted average.
+    """
+    m = jnp.max(vec)
+    # Log-Sum-Exp trick for the denominator/weights
+    exp_weights = jnp.exp(G * (vec - m)) 
+    sum_weights = jnp.sum(exp_weights)
+    
+    # The sum(mu * exp(G*mu)) / sum(exp(G*mu))
+    return jnp.sum(vec * exp_weights) / (sum_weights)
+```
 
 ### Inner Loop (BCGD)
 For a fixed penalty $\lambda$, we use **Block-Coordinate Gradient Descent (BCGD)**:
@@ -222,7 +293,7 @@ def penalty_method_outer_loop(u_init, config):
 ---
 
 ## 📜 Citation
-If you use this code in your research, please cite:
+If you use this method/code in your research, please cite:
 ```bibtex
 @inproceedings{VlahakisLCSS26,
   title={Efficient Multi-Agent Temporal Logic Planning via Block-Coordinate Optimization and Smooth Penalty Functions},
