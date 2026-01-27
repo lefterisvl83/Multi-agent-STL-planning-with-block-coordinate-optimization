@@ -120,6 +120,9 @@ $$
 | 8 | **end for** |
 | **Output:** | $\boldsymbol{u}^{\star,k}$ |
 
+> 🐍 **Python Implementation: JAX-Compatible BCGD**
+>
+> This function performs one full "epoch" of updates. By using `jax.lax.fori_loop`, we maintain the sequential dependency required by the Gauss-Seidel method while staying inside the XLA-compiled JIT boundary.
 
 ```python
 import jax
@@ -127,10 +130,6 @@ import jax.numpy as jnp
 
 @jax.jit
 def bcgd_epoch(u_k, lam, gamma_smooth, key):
-    """
-    Performs one full BCGD epoch. 
-    Each agent is updated sequentially in a random order.
-    """
     num_agents = u_k.shape[0]
     
     # 1. Randomly shuffle agent indices for this epoch
@@ -139,24 +138,20 @@ def bcgd_epoch(u_k, lam, gamma_smooth, key):
     def agent_update_body(i, current_u):
         idx = shuffled_indices[i]
         
-        # 2. Compute gradient of R for the current global trajectory
-        # Note: grad_R is re-evaluated to account for previous agent updates
+        # 2. Re-evaluate gradient for the updated global trajectory
         grad_R = jax.grad(compute_penalty_R)(current_u, gamma_smooth)
         
-        # 3. Compute Block Update Direction (BUD) for agent 'idx'
-        # Local subproblem: min over d_i only
+        # 3. Compute Block Update Direction (BUD) for specific agent
         d_i = solve_local_subproblem(current_u[idx], grad_R[idx], lam)
         
-        # 4. Armijo Line Search for this specific block
-        # Validates sufficient decrease for F_lambda along d_i
+        # 4. Armijo Line Search for this specific block update
         alpha_i = find_block_step_size(current_u, d_i, idx, lam)
         
-        # 5. In-place update (via JAX's .at[].set() syntax)
-        next_u = current_u.at[idx].set(current_u[idx] + alpha_i * d_i)
-        return next_u
+        # 5. Apply update to the agent block using JAX's functional syntax
+        return current_u.at[idx].set(current_u[idx] + alpha_i * d_i)
 
-    # Run sequential updates for all agents in the shuffled list
-    u_next = jax.lax.fori_loop(0, num_agents, agent_update_body, u_k)
+    # Execute sequential updates across all shuffled indices
+    return jax.lax.fori_loop(0, num_agents, agent_update_body, u_k)
     
     return u_next
 ```
@@ -180,6 +175,10 @@ def bcgd_epoch(u_k, lam, gamma_smooth, key):
 | 5 | $\quad$ Update $\lambda^{k+1} = \eta_\lambda \lambda^k$, $\bar{\boldsymbol{u}}^{k+1} = \boldsymbol{u}^{\star,k}$, $\epsilon^{k+1} = \eta_\epsilon \epsilon^k$ |
 | 6 | **end for** |
 | **Output:** | $\bar{\boldsymbol{u}}^{\star,k}$ |
+
+>🐍 **Python Implementation: Penalty Method (Outer Loop)**
+>
+> The outer loop gradually increases the penalty parameter $\lambda$ to drive the swarm toward a feasible STL solution.
 
 ```python
 def penalty_method_outer_loop(u_init, config):
