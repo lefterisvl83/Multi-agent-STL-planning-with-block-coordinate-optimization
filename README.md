@@ -84,6 +84,41 @@ which is a conjunctive STL formula, where each conjunct $\phi_\nu$ is defined ov
 
 The set $\mathcal{K}_\phi$ collects all these cliques induced by $\phi$, and may include individual agents $(|\nu|=1)$ or group of agents $(1<|\nu|\leq |\mathcal{V}|)$. Note that different cliques may overlap in their agent sets, indicating that some agents participate in multiple collaborative tasks. 
 
+> 🐍 Python Implementation: Clique-based Robustness
+>
+```python
+import jax.numpy as jnp
+
+def get_clique_trajectory(all_trajectories, clique_indices):
+    """
+    Collects individual trajectories into the aggregate clique trajectory x_nu(t).
+    all_trajectories: (M, N, dim) -> x_nu: (len(clique), N, dim)
+    """
+    return all_trajectories[jnp.array(clique_indices)]
+
+def global_specification(all_trajectories, K_phi, robustness_func):
+    """
+    Implements the conjunctive specification: phi = wedge phi_nu
+    """
+    rho_values = []
+    
+    # Iterate through each clique nu in the set of all cliques K_phi
+    for nu in K_phi:
+        # 1. Aggregate trajectories for agents in this specific clique
+        x_nu = get_clique_trajectory(all_trajectories, nu)
+        
+        # 2. Evaluate the specific conjunct phi_nu for this clique
+        rho_nu = robustness_func(x_nu, nu)
+        rho_values.append(rho_nu)
+    
+    # 3. The result is a vector of robustness values to be aggregated 
+    # using smooth semantics in the next section.
+    return jnp.array(rho_values)
+
+# Example: Agents 0 and 1 have individual tasks AND a shared task.
+# K_phi = [[0], [1], [0, 1]]
+```
+
 ---
 
 ## 📝 Problem Formulation
@@ -111,6 +146,27 @@ $$
 
 The goal is to minimize a separable cost function $\mathcal{L}(u)$ while satisfying a multi-agent STL specification $\phi$.
 
+> 🐍 Python implementation: Running control cost $\mathcal{L}(u_i)$ for unicycle dynamics
+>
+```python
+import jax
+import jax.numpy as jnp
+
+def unicycle_running_cost(state, control):
+    """Penalizes control effort and deviation from a goal."""
+    # control: [v, omega]
+    control_penalty = 0.1 * control[0]**2 + 0.5 * control[1]**2
+    return control_penalty
+
+@jax.jit
+def agent_total_cost(u_i, x0_i):
+    """Computes L_i(u_i) for a single unicycle agent."""
+    traj = compute_unicycle_trajectory(u_i, x0_i)
+    
+    # Sum running costs across the horizon
+    total_run = jnp.sum(jax.vmap(unicycle_running_cost)(traj[:-1], u_i))
+    return total_run
+```
 
 ---
 
@@ -128,20 +184,19 @@ This is a smooth penalty function with gradient
 
 $$\nabla R(**u**) = -2\max(0,-\varrho^\phi_\Gamma(**u**))\nabla\varrho_\Gamma^\phi(**u**)$$
 
-where $\varrho^\phi_\Gamma(u)$ represents the **smooth STL semantics** underapproximating $\min\rho^{\phi_\nu}(\mathbf{u}_\nu)$. 
+where $\varrho^\phi_\Gamma(u)$ represents the **smooth STL semantics** underapproximating $\min\rho^{\phi_\nu}(\mathbf{u}_\nu)$. We use **softmin/softmax** to underapproximate min/max operators in $\min\rho^{\phi_\nu}(\mathbf{u}_\nu)$: 
 
-> We use **softmin/softmax** to underapproximate min/max operators in $\min\rho^{\phi_\nu}(\mathbf{u}_\nu)$: 
->
->$$\min \left(\mu_1,\ldots,\mu_q\right) 
+$$\min \left(\mu_1,\ldots,\mu_q\right) 
 \overset{^{\geq}}{\approx} 
 -\frac{1}{\Gamma} \log\left(\sum_{j=1}^q \exp(-\Gamma \mu_j)\right)$$
->
->$$\max \left(\mu_1,\ldots,\mu_q\right) 
+
+$$\max \left(\mu_1,\ldots,\mu_q\right) 
 \overset{^{\geq}}{\approx} 
 \frac{\sum_{j=1}^q \mu_j \exp(\Gamma \mu_j)}{\sum_{j=1}^q \exp(\Gamma \mu_j)}$$
->
->where $\Gamma>0$ is the smoothing parameter.
 
+where $\Gamma>0$ is the smoothing parameter.
+> 🐍 Python implementation of softmin/softmax:
+> 
 ```python
 import jax
 import jax.numpy as jnp
