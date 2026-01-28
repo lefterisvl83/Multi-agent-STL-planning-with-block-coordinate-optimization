@@ -20,7 +20,7 @@ We consider discrete-time **unicycle dynamics** for each robot $i$:
 ### Collaborative Task Topology & Cliques $\nu \in \mathcal{K}_\phi$
 The figure below illustrates the collaborative formulas $\phi_\nu$ defined for cliques of agents. Each node represents a robot, and colored edges represent specific joint STL tasks.
 
-![Collaborative Graph](assets/clique_set_github.png)
+![Collaborative Graph](assets/clique_set_github.PNG)
 
 ### Task Specification (R2AM)
 The baseline **R2AM** (Reach-twice-Avoid-Meet) task requires each robot to:
