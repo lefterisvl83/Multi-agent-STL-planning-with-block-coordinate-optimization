@@ -1,4 +1,4 @@
-# Numerical Validation: Ten-Robot Motion Planning
+# Ten-Robot SLT Motion Planning (Numerical Validation)
 
 We evaluate the **BCGD-PM** (Block Coordinate Gradient Descent - Penalty Method) framework using a complex multi-agent motion planning scenario. We compare its performance against traditional Mixed-Integer Programming (MIP) approaches across various task specifications as well as linear and unicycle dynamical models.
 
@@ -13,7 +13,7 @@ The evaluation considers a ten-robot workspace containing three obstacles ($\mat
   <em>Figure: Workspace</em>
 </p>
 
-In the most challenging case, robot $i$ $(Ri)$ must satisfy a complex Signal Temporal Logic (STL) task:
+In the most challenging case, robots $(Ri)$ must satisfy a complex Signal Temporal Logic (STL) task:
 * **Reachability:** Visit collection region $C_i$ and delivery region $D_i$ within specific time intervals.
 * **Safety:** Avoid all obstacles $\mathcal{O}_l$ and maintain inter-agent collision avoidance.
 * **Collaboration:** Meet peers belonging to the same cliques within the 100-step time horizon. 
@@ -52,20 +52,37 @@ The figure below illustrates the collaborative formulas $\phi_\nu$ defined for c
   <em>Figure: Collaborative-task graph for the ten-robot system.</em>
 </p>
 
-### Multi-Agent Specifications
-Baseline specification **R2AM** (Reach-twice-Avoid-Meet) task requires each robot to:
+---
+
+## Multi-Agent STL scenarios
+### Baseline specification **R2AM** (Reach-twice-Avoid-Meet):
 1.  **Avoid Obstacles:** $\square_{\mathcal{I}}\neg \mathcal{O}_l$ for all time.
 2.  **Collect:** Visit region $C_i$ within $t \in [10, 50]$.
 3.  **Deliver:** Reach region $D_i$ within $t \in [70, 100]$.
-4.  **Collaborative Meeting:** Agents in specific cliques must approach each other ($\|x_i - x_j\| \leq 0.25$) within $t \in [0, 70]$.
+4.  **Collaborative Meeting:** Robots belonging to the same clique $\nu$ are required to approach each other within a distance of $0.25$ units during the interval $t \in [0, 70]$. The collaborative predicate for a clique is defined as:
+$$M_\nu \coloneqq \left( \min_{\kappa \in \nu} \mu_\kappa(x_\kappa) \geq 0 \right)$$
 
----
+where:
+* $x_\kappa = (z_q, y_q)_{q \in \kappa}$ represents the concatenated positions of the agents in team $\kappa$.
+* $\kappa = (i, j) \subseteq \nu$ denotes any pair of robots within the clique.
+* The predicate function is:  $\mu_\kappa(x_\kappa) = 0.25 - \left\| [I \quad -I] x_\kappa \right\|_2$
 
-## 2. Experimental Scenarios
-We extend the baseline R2AM task into more restrictive scenarios to test the limits of the framework:
+### **R2AMCA** (R2AM + Collision Avoidance)
+We extend the baseline **R2AM** specification by incorporating inter-agent safety constraints:
 
-1.  **R2AMCA:** Adds global **Inter-agent Collision Avoidance** ($\|x_i(t) - x_j(t)\| \geq 0.01$).
-2.  **RURAMCA (Reach-Until-Reach):** Incorporates the **Until** operator ($\mathcal{U}$), requiring robots to visit collection regions $C_i$ *until* they transition to delivery goals $D_i$, while maintaining all other constraints.
+1. **Inter-agent Collision Avoidance:** For every pair of agents $(i, j)$, a minimum safety distance must be maintained globally:
+   $$\|x_i(t) - x_j(t)\|_2 \geq 0.01, \quad \forall t \in [0, 100]$$
+2. **Standard Requirements:** Retains all Obstacle Avoidance, Collection, Delivery, and Collaborative Meeting constraints from the R2AM baseline.
+
+
+### **RURAMCA** (Reach-Until-Reach + Meet + Collision Avoidance)
+This scenario introduces more complex temporal dependencies by replacing simple reachability with the **Until** ($\mathcal{U}$) operator.
+
+1. **Reach-Until-Reach Task:** Each robot $i$ must visit the collection region $C_i$ *until* it moves toward the delivery goal $D_i$, specified as
+ 
+ $$(\lozenge_{[10,50]} C_i) U_{[0,50]} (\lozenge_{[10,50]} D_i)$$
+
+3. **Collaboration and Safety:** All collaborative meeting requirements as well as global inter-agent collision avoidance and obstacle avoidance constraints are retained from **R2AMCA**.
 
 ---
 
