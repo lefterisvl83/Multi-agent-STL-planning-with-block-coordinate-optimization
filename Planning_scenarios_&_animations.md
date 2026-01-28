@@ -87,7 +87,7 @@ This scenario introduces more complex temporal dependencies by replacing simple 
 ---
 
 ## 3. Performance Comparison
-The following table compares the computational runtime (in seconds) between our proposed **BCGD-PM** method and the **MIP** baseline. All benchmarks were performed on a KTH-13361 workstation equipped with a 13th Gen Intel(R) Core(TM) i7-1365U (1.80 GHz) processor and 16.0 GB RAM, running a 64-bit operating system.
+The following table compares the computational runtime (in seconds) between our proposed **BCGD-PM** method and the **MIP** baseline. All benchmarks were performed on a laptop equipped with a 13th Gen Intel(R) Core(TM) i7-1365U (1.80 GHz) processor and 16.0 GB RAM, running a 64-bit operating system.
 
 ---
 
@@ -102,16 +102,18 @@ The following table compares the computational runtime (in seconds) between our 
 
 ---
 
-## 4. Implementation Details & Parameter Selection
-The algorithm is implemented in **Python** leveraging **JAX** for high-performance hardware acceleration and automatic differentiation.
+## 4. Parameter Selection & Implementation Details
+The algorithm is implemented in **Python**, leveraging **JAX** for hardware-accelerated automatic differentiation.
 
-* **Outer Loop:** Penalty Method (terminates when infeasibility $R(\mathbf{u}) \leq 5.0 \times 10^{-4}$).
-* **Inner Loop:** BCGD with randomized block updates.
-* **Update Rule:** Using a simple Hessian approximation $H^k = I$, the update direction $\mathbf{d}_i^k$ at each BCGD iteration attains a closed-form solution:
+* **Smoothing Parameter ($\Gamma$):** Note that as $\Gamma \to \infty$, the smooth robustness $\varrho_\Gamma^\phi(u)$ converges to the non-smooth robustness $\rho^\phi(u)$, reducing the approximation gap. For the evaluated scenarios, we set $\Gamma=3$. 
+* **Penalty Parameter ($\lambda$):** We initialize $\lambda_0 = 1$ with an update factor $\eta_\lambda = 5$. Empirically, starting with a small $\lambda > 0$ yields smoother, more stable trajectories, as early iterations prioritize minimizing control effort over constraint satisfaction.
+* **Outer Loop (Penalty Method):** The outer loop terminates when infeasibility $R(\mathbf{u}) < \epsilon_{\mathrm{infeas}}$, where we select $\epsilon_{\mathrm{infeas}} = 5.0 \times 10^{-8}$. This tolerance implies that upon termination, the smooth robustness $\varrho_\Gamma^\phi(u) > - \sqrt{5} \times 10^{-4}$.
+* **Inner Loop (BCGD):** The inner loop utilizes randomized block updates performed in epochs. We use an initial inner tolerance of $\epsilon_0 = 10^{-2}$ and an update parameter $\eta_\epsilon = 0.2$. Shuffling the agent update order at each epoch significantly aids in avoiding local minima compared to centralized penalty methods.
+* **Closed-form Update Rule:** By employing a simple Hessian approximation $H^k = I$, the update direction $\mathbf{d}_i^k$ at each BCGD iteration is computed as:
 
   $$\mathbf{d}_i^k = - (\lambda^k + 2)^{-1} \left( 2 \mathbf{u}_i^k + \lambda^k \nabla R(\mathbf{u}^k)_i \right)$$
-  
-* **Efficiency:** BCGD typically terminates in fewer than 2750 updates per outer iteration. The randomization of block updates (shuffling agent order) significantly helps in avoiding local minima compared to centralized penalty methods.
+
+* **Performance:** BCGD typically converges within 2,750 updates per outer iteration (for the most challenging RURAMCA scenario). Each update incurs negligible computational overhead thanks to the JAX-based automatic differentiation and the closed-form expression for the direction update.
 
 ---
 
