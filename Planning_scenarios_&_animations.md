@@ -19,26 +19,29 @@ In the most challenging case, robot $i$ $(Ri)$ must satisfy a complex Signal Tem
 * **Collaboration:** Meet peers belonging to the same cliques within the 100-step time horizon. 
 
 ### Robot Dynamics
-We test performance under discrete-time **linear dynamics** as well as **unicycle dynamics** for each robot $i$ with discretization interval $\delta t=1$ time unit:
+We test performance under discrete-time **linear dynamics** as well as **unicycle dynamics** for each robot $i$ with discretization interval $\Delta t=1$ time unit:
 
 **Linear Case (Single Integrator):**
 In this simplified setup, the control inputs directly dictate the change in position.
 * **State:** $x_i(t) = (z_i(t), y_i(t)) \in \mathbb{R}^2$ (Cartesian position).
 * **Controls:** $u_i(t) = (u_{i,1}(t), u_{i,2}(t)) \in \mathbb{R}^2$ (velocity inputs).
-* **Equations:** $x_i(t+1) = x_i(t) + \delta t u_i(t)$
+* **Equations:** $x_i(t+1) = x_i(t) + \Delta t u_i(t)$
 
 **Unicycle case:**
 In this model, the robot's movement is restricted by its heading.
 * **State:** $x_i(t)=(z_i(t), y_i(t)) \in \mathbb{R}^2$ (Cartesian position) and $\theta_i(t) \in \mathbb{R}$ (heading).
 * **Controls:** $v_i(t)$ (linear velocity) and $\omega_i(t)$ (angular velocity).
 * **Equations:**
-$z_i(t+1)=z_i(t)+\delta t v_i(t)\cos\theta_i(t)$, $y_i(t+1)=y_i(t)+\delta t v_i(t)\sin\theta_i(t)$, $\theta_i(t+1)=\theta_i(t)+\delta t\omega_i(t)$
+$z_i(t+1)=z_i(t)+\Delta t v_i(t)\cos\theta_i(t)$, $y_i(t+1)=y_i(t)+\Delta t v_i(t)\sin\theta_i(t)$, and $\theta_i(t+1)=\theta_i(t)+\Delta t\omega_i(t)$
 
 ### Cost Function: $\mathcal{L}(u)=\sum_i \mathcal{L}_i(u_i)$:
-To retain convexity of $\mathcal{L}_i$ we penalize only control effort setting $\mathcal{L}_i(u_i)=\sum_{t=0}^{N-1}\ell_i(u_i(t),t))$.
+To retain convexity of $\mathcal{L}_i$ we penalize only control effort setting 
+
+$$\mathcal{L}_i(u_i) = \sum_{t=0}^{N-1} \ell_i(u_i(t),t)$$
+
 * **Linear case:** $\ell_i(u_i(t),t)=u_{i,1}(t)^2+u_{i,2}(t)^2$
 
-* **Unicycle case:** $\ell_i(u_i(t),t)=(w_1 v_i(t))^2+(w_2 \omega_i(t))^2$, where $w_1$, $w_2$ are weighting factors balancing the emphasis between linear and angular velocity control effort.
+* **Unicycle case:** $\ell_i(u_i(t),t)=(w_1 v_i(t))^2+(w_2 \omega_i(t))^2$, where $w_1$ and $w_2$ are weighting factors balancing the emphasis between linear and angular velocity control effort.
 
 ### Collaborative Task Topology & Cliques $\nu \in \mathcal{K}_\phi$
 The figure below illustrates the collaborative formulas $\phi_\nu$ defined for cliques of agents. Each node represents a robot, and colored edges represent specific joint (meeting) STL tasks.
