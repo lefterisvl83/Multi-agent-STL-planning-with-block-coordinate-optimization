@@ -87,7 +87,9 @@ This scenario introduces more complex temporal dependencies by replacing simple 
 ---
 
 ## 3. Performance Comparison
-The following table compares the computational runtime (in seconds) between our proposed **BCGD** method and the **MIP** baseline.
+The following table compares the computational runtime (in seconds) between our proposed **BCGD-PM** method and the **MIP** baseline. All benchmarks were performed on a KTH-13361 workstation equipped with a 13th Gen Intel(R) Core(TM) i7-1365U (1.80 GHz) processor and 16.0 GB RAM, running a 64-bit operating system.
+
+---
 
 | Scenario | Dynamics | BCGD-PM (Ours) | MIP [1, 2] |
 | :--- | :--- | :--- | :--- |
@@ -100,13 +102,15 @@ The following table compares the computational runtime (in seconds) between our 
 
 ---
 
-## 4. Implementation Details
+## 4. Implementation Details & Parameter Selection
 The algorithm is implemented in **Python** leveraging **JAX** for high-performance hardware acceleration and automatic differentiation.
 
 * **Outer Loop:** Penalty Method (terminates when infeasibility $R(\mathbf{u}) \leq 5.0 \times 10^{-4}$).
 * **Inner Loop:** BCGD with randomized block updates.
-* **Update Rule:** Using a simple Hessian approximation $H^k = I$, we solve for the update direction $\mathbf{d}_i^k$ via the closed-form:
-    $$\mathbf{d}_i^k = - (\lambda^k + 2)^{-1} \left( 2 \mathbf{u}_i^k + \lambda^k \nabla R(\mathbf{u}^k)_i \right)$$
+* **Update Rule:** Using a simple Hessian approximation $H^k = I$, the update direction $\mathbf{d}_i^k$ at each BCGD iteration attains a closed-form solution:
+
+  $$\mathbf{d}_i^k = - (\lambda^k + 2)^{-1} \left( 2 \mathbf{u}_i^k + \lambda^k \nabla R(\mathbf{u}^k)_i \right)$$
+  
 * **Efficiency:** BCGD typically terminates in fewer than 2750 updates per outer iteration. The randomization of block updates (shuffling agent order) significantly helps in avoiding local minima compared to centralized penalty methods.
 
 ---
