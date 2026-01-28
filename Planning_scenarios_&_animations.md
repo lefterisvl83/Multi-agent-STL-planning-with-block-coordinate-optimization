@@ -8,7 +8,7 @@ We evaluate the **BCGD-PM** (Block Coordinate Gradient Descent - Penalty Method)
 The evaluation considers a ten-robot workspace containing three obstacles ($\mathcal{O}_1, \mathcal{O}_2, \mathcal{O}_3$), ten collection regions ($C_i$), and ten delivery regions ($D_i$). 
 
 <p align="center">
-  <img src="assets/workspace_layout.png" width="650">
+  <img src="assets/workspace_layout.png" width="850">
   <br>
   <em>Figure: Workspace</em>
 </p>
@@ -35,10 +35,13 @@ In this model, the robot's movement is restricted by its heading.
 $z_i(t+1)=z_i(t)+\delta t v_i(t)\cos\theta_i(t)$, $y_i(t+1)=y_i(t)+\delta t v_i(t)\sin\theta_i(t)$, $\theta_i(t+1)=\theta_i(t)+\delta t\omega_i(t)$
 
 ### Cost Function: $\mathcal{L}(u)=\sum_i \mathcal{L}_i(u_i)$:
-To retain convexity of $\mathcal{L}_i$ we 
+To retain convexity of $\mathcal{L}_i$ we penalize only control effort setting $\mathcal{L}_i(u_i)=\sum_{t=0}^{N-1}\ell_i(u_i(t),t))$.
+* **Linear case:** $\ell_i(u_i(t),t)=u_{i,1}(t)^2+u_{i,2}(t)^2$
+
+* **Unicycle case:** $\ell_i(u_i(t),t)=(w_1 v_i(t))^2+(w_2 \omega_i(t))^2$, where $w_1$, $w_2$ are weighting factors balancing the emphasis between linear and angular velocity control effort.
 
 ### Collaborative Task Topology & Cliques $\nu \in \mathcal{K}_\phi$
-The figure below illustrates the collaborative formulas $\phi_\nu$ defined for cliques of agents. Each node represents a robot, and colored edges represent specific joint STL tasks.
+The figure below illustrates the collaborative formulas $\phi_\nu$ defined for cliques of agents. Each node represents a robot, and colored edges represent specific joint (meeting) STL tasks.
 
 <p align="center">
   <img src="assets/clique_set_github.PNG" width="550">
@@ -46,8 +49,8 @@ The figure below illustrates the collaborative formulas $\phi_\nu$ defined for c
   <em>Figure: Collaborative-task graph for the ten-robot system.</em>
 </p>
 
-### Task Specification (R2AM)
-The baseline **R2AM** (Reach-twice-Avoid-Meet) task requires each robot to:
+### Multi-Agent Specifications
+Baseline specification **R2AM** (Reach-twice-Avoid-Meet) task requires each robot to:
 1.  **Avoid Obstacles:** $\square_{\mathcal{I}}\neg \mathcal{O}_l$ for all time.
 2.  **Collect:** Visit region $C_i$ within $t \in [10, 50]$.
 3.  **Deliver:** Reach region $D_i$ within $t \in [70, 100]$.
