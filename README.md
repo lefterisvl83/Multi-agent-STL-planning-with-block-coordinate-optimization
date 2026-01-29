@@ -335,7 +335,7 @@ def bcgd_epoch(u_k, lam, gamma_smooth, key):
 
 >🐍 **Python Implementation: Penalty Method (Outer Loop)**
 >
-> The outer loop gradually increases the penalty parameter $\lambda$ to drive the swarm toward a feasible STL solution.
+> The outer loop gradually increases the penalty parameter $\lambda$ to drive the MAS toward a feasible STL solution.
 
 ```python
 def penalty_method_outer_loop(u_init, config):
