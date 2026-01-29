@@ -112,7 +112,16 @@ The following comparisons demonstrate the MAS trajectories across the three mult
 | ![R2AM Linear](assets/Github_gif_intro.gif) | ![R2AM Unicycle](assets/Github_gif_intro.gif) |
 | *Baseline mission using single integrator dynamics.* | *Baseline mission under non-linear unicycle constraints.* |
 
+#### 🔗 Link to the code: 
+* **Linear Scenarios**: [`R2AM_linear`](./code/RURAMCA_linear.py)
+* **Unicycle Scenarios**: [`R2AM_linear`](./code/RURAMCA_linear.py)
 
+### 🛠 How to Reproduce Results
+Each animation corresponds to a specific execution script. For example, to reproduce the **RURAMCA Unicycle** results:
+
+1. Navigate to the scenario directory:
+   ```bash
+   cd scripts/unicycle
 ---
 
 ### 📍 R2AMCA: R2AM + Collision Avoidance
