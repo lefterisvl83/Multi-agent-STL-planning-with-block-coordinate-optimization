@@ -113,8 +113,8 @@ The following comparisons demonstrate the MAS trajectories across the three mult
 | *Baseline mission using single integrator dynamics.* | *Baseline mission under non-linear unicycle constraints.* |
 
 #### 🔗 Link to the code: 
-* **Linear Scenarios**: [`R2AM_linear`](./code/RURAMCA_linear.py)
-* **Unicycle Scenarios**: [`R2AM_linear`](./code/RURAMCA_linear.py)
+* **Linear Scenarios**: [`R2AM_linear`](./code/RURAMCA_unicycle.py)
+* **Unicycle Scenarios**: [`R2AM_linear`](./code/RURAMCA_unicycle.py)
 
 ### 🛠 How to Reproduce Results
 Each animation corresponds to a specific execution script. For example, to reproduce the **RURAMCA Unicycle** results:
