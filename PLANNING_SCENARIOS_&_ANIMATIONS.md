@@ -72,7 +72,7 @@ We extend the baseline **R2AM** specification by incorporating inter-agent safet
 
 1. **Inter-agent Collision Avoidance:** For every pair of agents $(i, j)$, a minimum safety distance must be maintained globally:
    $$\|x_i(t) - x_j(t)\|_2 \geq 0.01, \quad \forall t \in [0, 100]$$
-2. **Standard Requirements:** Retains all Obstacle Avoidance, Collection, Delivery, and Collaborative Meeting constraints from the R2AM baseline.
+2. **Baseline Requirements:** Retains all Obstacle Avoidance, Collection, Delivery, and Collaborative Meeting constraints from the R2AM baseline.
 
 
 ### **RURAMCA** (Reach-Until-Reach + Meet + Collision Avoidance)
