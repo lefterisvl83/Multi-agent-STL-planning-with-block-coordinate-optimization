@@ -152,12 +152,12 @@ All benchmarks were performed on a laptop equipped with:
 ### Runtime Results
 | Scenario | Dynamics | BCGD-PM (Ours) | MIP [1, 2] |
 | :--- | :--- | :--- | :--- |
-| **R2AM** | Linear | **345s** | 425s |
-| **R2AMCA** | Linear | **1291s** | > 2000s |
-| **RURAMCA** | Linear | **1740s** | > 10000s |
-| **R2AM** | Unicycle | **820s** | N/A |
-| **R2AMCA** | Unicycle | **1852s** | N/A |
-| **RURAMCA** | Unicycle | **2326s** | N/A |
+| **R2AM** | Linear | **12s** | 425s |
+| **R2AMCA** | Linear | **13s** | > 2000s |
+| **RURAMCA** | Linear | **35s** | > 10000s |
+| **R2AM** | Unicycle | **234s** | N/A |
+| **R2AMCA** | Unicycle | **288s** | N/A |
+| **RURAMCA** | Unicycle | **480s** | N/A |
 
 ### 📚 References
 
