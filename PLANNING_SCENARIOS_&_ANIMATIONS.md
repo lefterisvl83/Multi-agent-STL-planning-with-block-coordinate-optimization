@@ -109,7 +109,7 @@ The following comparisons demonstrate the MAS trajectories across the three mult
 ### 📍 R2AM: Baseline Reach-twice-Avoid-Meet
 | Linear Dynamics | Unicycle Dynamics |
 | :---: | :---: |
-| ![R2AM Linear](assets/Github_gif_intro.gif) | ![R2AM Unicycle](assets/Github_gif_intro.gif) |
+| ![R2AM Linear](assets/Github_gif_intro.gif) | ![R2AM Unicycle](assets/R2AM_Unicycle_Final.gif) |
 | *Baseline mission using single integrator dynamics.* | *Baseline mission under non-linear unicycle constraints.* |
 
 #### 🔗 Link to the code: 
